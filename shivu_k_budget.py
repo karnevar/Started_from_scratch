@@ -1,3 +1,8 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+# In[60]:
+
 
 import pandas as pd
 import numpy as np
@@ -10,6 +15,8 @@ import matplotlib.pyplot as plt
 
 db_connection = pymysql.connect(host='54.67.38.144',user='shivangi',password='Shivangi@123',db='ccbst_migrate')
 
+
+# In[61]:
 
 
 def q1():
@@ -26,6 +33,60 @@ def q1():
     return df50
 
 
+# In[62]:
+
+
+# f1 = q1()['name'].unique()
+# f1
+
+
+# In[63]:
+
+
+# f2 = q2()['name'].unique()
+# f2
+
+
+# In[64]:
+
+
+# f3 = q3()['name'].unique()
+# f3
+
+
+# In[65]:
+
+
+# f3.shape
+
+
+# In[66]:
+
+
+# set(f1)&set(f2)
+
+
+# In[67]:
+
+
+# set(f1)&set(f3)
+
+
+# In[68]:
+
+
+set(f1).issubset(set(f2))
+
+
+# In[69]:
+
+
+set(f1).issubset(set(f3))
+
+
+# In[70]:
+
+
 def q2():
     df1=pd.read_sql_query("SELECT DISTINCT nmr.id,coa.name,nmr.coa_id,nmr.status,nmr.number_of_inquiry,nmr.converted_student,nmr.campus,invoices.id as invoice_id,ids.chart_of_activity_id,invoices.amount_total,invoices.created_at,coa.do_marketing_status FROM `new_marketing_reports` as nmr LEFT JOIN chart_of_activities as coa ON nmr.coa_id = coa.id LEFT JOIN invoice_details as ids ON coa.id = ids.chart_of_activity_id LEFT JOIN invoices ON ids.invoice_id = invoices.id WHERE nmr.STATUS in (0,1) AND nmr.number_of_inquiry != 0 AND invoices.created_at > '2019-05-31 20:00:00' AND do_marketing_status =1 GROUP BY invoice_id",db_connection)
     df1['name']=df1['name'].str.replace("/","-")
@@ -33,6 +94,9 @@ def q2():
 
     return df1
     
+
+
+# In[71]:
 
 
 def q3():
@@ -43,18 +107,7 @@ def q3():
     return df
 
 
-from flask import Flask, jsonify, request
-from flask_cors import CORS, cross_origin
-
-app = Flask(__name__)
-CORS(app)
-
-
-@app.route('/')
-
-
-def generate_graph():
-    return_json={}
+# In[72]:
 
 
 def merge1(df50, name):
@@ -77,6 +130,10 @@ def merge1(df50, name):
     abc1.sum_of_predicted_inquries = abc1.sum_of_predicted_inquries.round()
     return abc1
 
+
+# In[73]:
+
+
 def merge2(df1, name):
     df1=df1.loc[df1.name == name]
     df1['Date'] = pd.to_datetime(df1['created_at'])
@@ -94,6 +151,8 @@ def merge2(df1, name):
     return amount
 
 
+# In[74]:
+
 
 def merge3(df,amount, name):    
     df=df.loc[df.name == name]
@@ -110,6 +169,8 @@ def merge3(df,amount, name):
     return final_merge
 
 
+# In[75]:
+
 
 def fillna_moving_avereage(data, window=3):
     result = data[:window]
@@ -120,6 +181,7 @@ def fillna_moving_avereage(data, window=3):
     return result 
 
 
+# In[76]:
 
 
 def f_merge(abc1,final_merge):
@@ -136,6 +198,8 @@ def f_merge(abc1,final_merge):
     return merged_Frame
 
 
+# In[77]:
+
 
 df1 = q1()
 df2 = q2()
@@ -147,26 +211,24 @@ n3 = df3['name'].unique()
 
 names = set(n1) & set(n2) & set(n3)
 
-
 for name in names:
-        abc1 = merge1(df1,name)
-        amount = merge2(df2,name)
-        final_merge = merge3(df3,amount,name)
-        merged_Frame = f_merge(abc1,final_merge)
-        print(name)
+    abc1 = merge1(df1,name)
+    amount = merge2(df2,name)
+    final_merge = merge3(df3,amount,name)
+    merged_Frame = f_merge(abc1,final_merge)
+    print(name)
+    
+    
 
 
-merged_Frame.savefig("budget prediction_"+name+'.png')
-return_json[index] = files_name
+# In[ ]:
 
 
-return jsonify(return_json)
+names
 
 
+# In[ ]:
 
-
-if __name__ == "__main__":
-    app.run(debug=True, host='127.0.0.1', port=3000)
 
 
 
